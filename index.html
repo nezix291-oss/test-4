@@ -1,1 +1,629 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The New Valdoria ✦ Serveur Minecraft</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #9b59b6;
+      --primary-dark: #7d3c98;
+      --secondary: #f1c40f;
+      --dark: #0a0a0f;
+      --light: #ecf0f1;
+      --success: #2ecc71;
+      --danger: #e74c3c;
+      --card-bg: rgba(20, 15, 35, 0.9);
+      --glass: rgba(30, 25, 50, 0.8);
+      --border: rgba(155, 89, 182, 0.4);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #050508, #1a1a2e, #16213e);
+      color: var(--light); min-height: 100vh; line-height: 1.6; overflow-x: hidden;
+    }
+    .navbar {
+      position: fixed; top: 0; width: 100%; padding: 1rem 2rem;
+      background: var(--glass); backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border); z-index: 1000;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .logo { font-size: 1.4rem; font-weight: bold; color: var(--secondary); display: flex; align-items: center; gap: 0.5rem; }
+    .nav-links { display: flex; list-style: none; gap: 1.5rem; }
+    .nav-links a { color: var(--light); text-decoration: none; padding: 0.5rem 1rem; border-radius: 8px; transition: 0.3s; display: flex; align-items: center; gap: 0.3rem; }
+    .nav-links a:hover, .nav-links a.active { background: var(--primary); color: white; }
+    .nav-actions { display: flex; align-items: center; gap: 1rem; }
+    .mobile-toggle { display: none; background: none; border: none; color: var(--light); font-size: 1.5rem; cursor: pointer; }
+    .btn {
+      padding: 0.7rem 1.5rem; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;
+      transition: 0.3s; display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; font-size: 0.95rem;
+    }
+    .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(155,89,182,0.5); }
+    .btn-discord { background: #5865F2; color: white; }
+    .btn-discord:hover { background: #4752c4; }
+    .btn-copy { background: var(--glass); border: 1px solid var(--border); color: var(--light); padding: 0.4rem 0.7rem; border-radius: 6px; cursor: pointer; margin-left: 0.5rem; }
+    .btn-copy:hover { background: var(--primary); }
+    .section { display: none; padding: 6rem 2rem 4rem; min-height: 100vh; max-width: 1200px; margin: 0 auto; }
+    .section.active { display: block; animation: fadeIn 0.4s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .hero { display: flex; align-items: center; justify-content: center; text-align: center; padding-top: 8rem; min-height: 100vh; }
+    .hero.active { display: flex; }
+    .hero h1 { font-size: 2.8rem; margin-bottom: 1rem; color: var(--secondary); text-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary); }
+    .subtitle { font-size: 1.2rem; color: #bdc3c7; margin-bottom: 2.5rem; }
+    .server-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 1.8rem; margin: 1.5rem auto; max-width: 500px; }
+    .server-header { font-weight: bold; color: var(--secondary); margin-bottom: 1rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--border); }
+    .info-row { display: flex; align-items: center; gap: 0.7rem; padding: 0.5rem 0; font-size: 1rem; }
+    .info-row code { background: var(--glass); padding: 0.3rem 0.7rem; border-radius: 5px; font-family: monospace; color: var(--secondary); }
+    .status-online { color: var(--success); font-weight: 600; }
+    .server-actions { display: flex; gap: 0.8rem; justify-content: center; margin-top: 1.2rem; flex-wrap: wrap; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-top: 2rem; max-width: 800px; margin-left: auto; margin-right: auto; }
+    .stat-card { background: var(--card-bg); padding: 1.2rem; border-radius: 12px; text-align: center; border: 1px solid var(--border); }
+    .stat-value { font-size: 1.5rem; font-weight: bold; color: var(--secondary); }
+    .stat-label { color: #95a5a6; font-size: 0.85rem; }
+    .section-title { text-align: center; margin-bottom: 2rem; }
+    .section-title h2 { font-size: 2rem; color: var(--secondary); margin-bottom: 0.5rem; }
+    .shop-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+    .box-card { background: var(--card-bg); border: 2px solid var(--border); border-radius: 16px; padding: 1.5rem; text-align: center; position: relative; transition: 0.3s; }
+    .box-card.available { border-color: var(--primary); }
+    .box-card.available:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(155,89,182,0.3); }
+    .box-card.locked { opacity: 0.75; }
+    .lock-overlay { position: absolute; inset: 0; background: rgba(10,10,15,0.85); display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 14px; z-index: 5; }
+    .lock-overlay i { font-size: 2.5rem; color: var(--secondary); margin-bottom: 0.5rem; }
+    .box-icon { font-size: 2.5rem; color: var(--primary); margin: 0.8rem 0; }
+    .box-icon.emerald { color: #2ecc71; } .box-icon.ruby { color: #e74c3c; }
+    .gem-animation { font-size: 3rem; animation: pulse 1.5s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
+    .box-rewards { list-style: none; text-align: left; margin: 1rem 0; color: #bdc3c7; font-size: 0.95rem; }
+    .box-rewards li { padding: 0.3rem 0; display: flex; align-items: center; gap: 0.5rem; }
+    .box-rewards i { color: var(--success); }
+    .box-price { font-size: 1.4rem; font-weight: bold; color: var(--secondary); margin: 0.8rem 0; }
+    .btn-buy { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border: none; padding: 0.7rem 1.5rem; border-radius: 10px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 0.5rem; transition: 0.3s; }
+    .btn-buy:hover { transform: translateY(-2px); }
+    .btn-buy:disabled { background: #34495e; cursor: not-allowed; transform: none !important; }
+    .daily-reward { background: linear-gradient(135deg, rgba(155,89,182,0.2), rgba(241,196,15,0.1)); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; text-align: center; max-width: 500px; margin: 2rem auto 0; }
+    .reward-timer { background: var(--glass); padding: 0.7rem 1.2rem; border-radius: 10px; margin: 0.8rem 0; font-weight: 500; }
+    #countdown { color: var(--secondary); font-weight: bold; font-family: monospace; }
+    .profile-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; text-align: center; max-width: 500px; margin: 0 auto; }
+    .profile-header { display: flex; align-items: center; justify-content: center; gap: 1.2rem; margin-bottom: 1.5rem; padding-bottom: 1.2rem; border-bottom: 1px solid var(--border); }
+    .avatar { width: 70px; height: 70px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; color: var(--dark); }
+    .user-rank { background: var(--primary); padding: 0.25rem 0.9rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+    .profile-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; margin: 1.5rem 0; }
+    .stat-item { background: var(--glass); padding: 0.8rem; border-radius: 10px; }
+    .stat-item i { color: var(--secondary); margin-bottom: 0.3rem; }
+    .stat-item .stat-value { font-size: 1.2rem; font-weight: bold; }
+    .stat-item .stat-label { color: #95a5a6; font-size: 0.8rem; }
+    .profile-actions { display: flex; gap: 0.8rem; justify-content: center; margin-top: 1rem; }
+    .auth-prompt { text-align: center; padding: 2.5rem 1.5rem; background: var(--card-bg); border-radius: 16px; border: 1px dashed var(--border); max-width: 400px; margin: 0 auto; }
+    .auth-prompt i { font-size: 3rem; color: var(--primary); margin-bottom: 1rem; opacity: 0.8; }
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000; align-items: center; justify-content: center; padding: 1rem; }
+    .modal.active { display: flex; }
+    .modal-content { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 400px; padding: 1.8rem; position: relative; }
+    .modal-close { position: absolute; top: 1rem; right: 1.2rem; font-size: 1.8rem; cursor: pointer; color: #95a5a6; }
+    .modal-close:hover { color: var(--danger); }
+    .auth-tabs { display: flex; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+    .tab-btn { flex: 1; padding: 0.8rem; background: none; border: none; color: #95a5a6; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; }
+    .tab-btn.active { color: var(--secondary); border-bottom-color: var(--secondary); }
+    .auth-form { display: none; }
+    .auth-form.active { display: block; }
+    .form-group { margin-bottom: 1.2rem; }
+    .form-group label { display: block; margin-bottom: 0.4rem; color: #bdc3c7; font-size: 0.95rem; }
+    .form-group input { width: 100%; padding: 0.8rem 1rem; background: var(--glass); border: 1px solid var(--border); border-radius: 8px; color: var(--light); font-size: 1rem; }
+    .form-group input:focus { outline: none; border-color: var(--primary); }
+    .full-width { width: 100%; }
+    .admin-panel { display: none; position: fixed; inset: 0; background: rgba(5,5,8,0.98); z-index: 3000; padding: 1.5rem; overflow-y: auto; }
+    .admin-panel.active { display: block; animation: fadeIn 0.3s ease; }
+    .admin-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
+    .admin-header h2 { color: var(--secondary); display: flex; align-items: center; gap: 0.5rem; }
+    .btn-close-admin { background: var(--danger); color: white; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 1rem; }
+    .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem; }
+    .admin-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 1.2rem; }
+    .admin-card h3 { color: var(--secondary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--border); }
+    .admin-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    .admin-table th, .admin-table td { padding: 0.6rem; text-align: left; border-bottom: 1px solid var(--border); }
+    .admin-table th { color: var(--secondary); }
+    .admin-table button { background: var(--primary); border: none; color: white; padding: 0.3rem 0.6rem; border-radius: 5px; cursor: pointer; margin: 0.15rem; font-size: 0.85rem; }
+    .shop-management { display: flex; flex-direction: column; gap: 0.8rem; }
+    .shop-item { display: flex; justify-content: space-between; align-items: center; padding: 0.7rem; background: var(--glass); border-radius: 8px; font-size: 0.95rem; }
+    .price-tag { color: var(--secondary); font-weight: 600; }
+    .toggle { position: relative; display: inline-block; width: 45px; height: 24px; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; inset: 0; background: #34495e; border-radius: 24px; transition: 0.3s; }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.3s; }
+    input:checked + .slider { background: var(--success); }
+    input:checked + .slider:before { transform: translateX(21px); }
+    .admin-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid var(--border); color: #95a5a6; font-size: 0.9rem; flex-wrap: wrap; gap: 0.8rem; }
+    .btn-danger { background: var(--danger); color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 8px; cursor: pointer; font-weight: 600; }
+    .toast-container { position: fixed; top: 80px; right: 1.5rem; z-index: 4000; display: flex; flex-direction: column; gap: 0.6rem; }
+    .toast { background: var(--card-bg); border-left: 4px solid var(--primary); padding: 0.9rem 1.3rem; border-radius: 8px; display: flex; align-items: center; gap: 0.7rem; min-width: 280px; animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards; font-size: 0.95rem; }
+    .toast.success { border-left-color: var(--success); }
+    .toast.error { border-left-color: var(--danger); }
+    .toast.warning { border-left-color: var(--secondary); }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes fadeOut { to { opacity: 0; transform: translateX(15px); } }
+    .particle { position: fixed; border-radius: 50%; pointer-events: none; animation: float 6s ease-in-out infinite; opacity: 0.4; z-index: -1; }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+    @media (max-width: 768px) {
+      .nav-links { display: none; position: absolute; top: 100%; left: 0; width: 100%; background: var(--glass); flex-direction: column; padding: 1rem; gap: 0.5rem; }
+      .nav-links.active { display: flex; }
+      .mobile-toggle { display: block; }
+      .hero h1 { font-size: 2.2rem; }
+      .profile-stats { grid-template-columns: 1fr; }
+      .server-actions { flex-direction: column; }
+      .admin-grid { grid-template-columns: 1fr; }
+      .admin-footer { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="logo"><i class="fas fa-gem"></i> The New Valdoria</div>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#home" class="active"><i class="fas fa-home"></i> Accueil</a></li>
+      <li><a href="#shop"><i class="fas fa-store"></i> Boutique</a></li>
+      <li><a href="#profile"><i class="fas fa-user"></i> Profil</a></li>
+      <li><a href="#" id="adminTrigger"><i class="fas fa-crown"></i> Accès Réservé</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button id="authBtn" class="btn btn-primary"><i class="fas fa-sign-in-alt"></i> Connexion</button>
+    </div>
+    <button class="mobile-toggle" id="mobileToggle"><i class="fas fa-bars"></i></button>
+  </nav>
 
+  <!-- Accueil -->
+  <section id="home" class="section hero active">
+    <div>
+      <h1>✦ The New Valdoria ✦</h1>
+      <p class="subtitle">Un royaume médiéval fantastique vous attend</p>
+      <div class="server-card">
+        <div class="server-header"><i class="fas fa-server"></i> Informations du Serveur</div>
+        <div class="info-row">
+          <span><i class="fas fa-network-wired"></i> IP :</span>
+          <code id="serverIP">151.240.100.21:25582</code>
+          <button class="btn-copy" id="copyIP"><i class="fas fa-copy"></i></button>
+        </div>
+        <div class="info-row"><span><i class="fas fa-users"></i> Joueurs :</span> <strong id="playerCount">52</strong> enregistrés</div>
+        <div class="info-row"><span><i class="fas fa-gift"></i> Caisses ouvertes :</span> <strong id="casesOpened">21</strong></div>
+        <div class="info-row"><span><i class="fas fa-circle"></i> Statut :</span> <span class="status-online">En ligne</span></div>
+        <div class="server-actions">
+          <a href="https://discord.gg/vGBAVhcfWq" target="_blank" class="btn btn-discord"><i class="fab fa-discord"></i> Discord</a>
+          <button class="btn btn-primary" id="launchBtn"><i class="fas fa-play"></i> Jouer</button>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-value" id="totalMoney">23,660$</div><div class="stat-label">Économie</div></div>
+        <div class="stat-card"><div class="stat-value">12</div><div class="stat-label">Événements/mois</div></div>
+        <div class="stat-card"><div class="stat-value">99.9%</div><div class="stat-label">Uptime</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Boutique (Cachée par défaut) -->
+  <section id="shop" class="section">
+    <div class="section-title"><h2><i class="fas fa-store"></i> Boutique Royale</h2><p>Loot boxes exclusives</p></div>
+    <div class="shop-grid">
+      <div class="box-card available">
+        <h3>Box Améthyste</h3>
+        <div class="box-icon"><i class="fas fa-gem"></i></div>
+        <div class="gem-animation">💜</div>
+        <ul class="box-rewards">
+          <li><i class="fas fa-check"></i> Items rares</li>
+          <li><i class="fas fa-check"></i> Grades exclusifs</li>
+          <li><i class="fas fa-check"></i> Effets spéciaux</li>
+        </ul>
+        <div class="box-price">1200 <i class="fas fa-coins"></i></div>
+        <button class="btn-buy" data-price="1200" data-box="Box Améthyste">Acheter</button>
+      </div>
+      <div class="box-card locked locked-by-default">
+        <div class="lock-overlay"><i class="fas fa-lock"></i><span>Bientôt</span></div>
+        <h3>Box Émeraude</h3>
+        <div class="box-icon emerald"><i class="fas fa-gem"></i></div>
+        <div class="gem-animation">💚</div>
+        <ul class="box-rewards"><li><i class="fas fa-check"></i> Équipements légendaires</li><li><i class="fas fa-check"></i> Montures exclusives</li></ul>
+        <div class="box-price">2500 <i class="fas fa-coins"></i></div>
+        <button class="btn-buy" disabled data-price="2500" data-box="Box Émeraude">Verrouillée</button>
+      </div>
+      <div class="box-card locked locked-by-default">
+        <div class="lock-overlay"><i class="fas fa-lock"></i><span>Bientôt</span></div>
+        <h3>Box Rubis</h3>
+        <div class="box-icon ruby"><i class="fas fa-gem"></i></div>
+        <div class="gem-animation">❤️</div>
+        <ul class="box-rewards"><li><i class="fas fa-check"></i> Armes mythiques</li><li><i class="fas fa-check"></i> Cosmétiques uniques</li></ul>
+        <div class="box-price">3000 <i class="fas fa-coins"></i></div>
+        <button class="btn-buy" disabled data-price="3000" data-box="Box Rubis">Verrouillée</button>
+      </div>
+    </div>
+    <div class="daily-reward">
+      <h3><i class="fas fa-calendar-day"></i> Récompense Quotidienne</h3>
+      <p>Toutes les 24h !</p>
+      <div class="reward-timer"><i class="fas fa-clock"></i> Dans : <span id="countdown">--:--:--</span></div>
+      <button id="claimReward" class="btn btn-primary"><i class="fas fa-gift"></i> Réclamer</button>
+    </div>
+  </section>
+
+  <!-- Profil -->
+  <section id="profile" class="section">
+    <div class="section-title"><h2><i class="fas fa-user"></i> Mon Profil</h2></div>
+    <div id="profileContent">
+      <div class="profile-card" id="loggedInProfile" style="display:none;">
+        <div class="profile-header">
+          <div class="avatar"><i class="fas fa-user"></i></div>
+          <div><h3 id="username">Joueur</h3><span class="user-rank" id="userRank">Membre</span></div>
+        </div>
+        <div class="profile-stats">
+          <div class="stat-item"><i class="fas fa-coins"></i><div><div class="stat-label">Solde</div><div class="stat-value" id="userBalance">455$</div></div></div>
+          <div class="stat-item"><i class="fas fa-gift"></i><div><div class="stat-label">Récompenses</div><div class="stat-value" id="userRewards">0</div></div></div>
+          <div class="stat-item"><i class="fas fa-box"></i><div><div class="stat-label">Boxes</div><div class="stat-value" id="userBoxes">0</div></div></div>
+        </div>
+        <div class="profile-actions">
+          <button id="logoutBtn" class="btn" style="background:var(--glass);color:var(--light);border:1px solid var(--border)"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
+          <button id="refreshBalance" class="btn btn-primary"><i class="fas fa-sync"></i> Actualiser</button>
+        </div>
+      </div>
+      <div class="auth-prompt" id="loggedOutProfile">
+        <i class="fas fa-lock"></i><h3>Connectez-vous</h3><p>Accédez à votre solde et récompenses</p>
+        <button id="loginFromProfile" class="btn btn-primary"><i class="fas fa-sign-in-alt"></i> Se connecter</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal Auth -->
+  <div class="modal" id="authModal">
+    <div class="modal-content">
+      <span class="modal-close" id="closeAuth">&times;</span>
+      <div class="auth-tabs">
+        <button class="tab-btn active" data-tab="login">Connexion</button>
+        <button class="tab-btn" data-tab="register">Inscription</button>
+      </div>
+      <form id="loginForm" class="auth-form active">
+        <div class="form-group"><label>Identifiant</label><input type="text" id="loginUsername" placeholder="Pseudo" required></div>
+        <div class="form-group"><label>Mot de passe</label><input type="password" id="loginPassword" placeholder="••••••••" required></div>
+        <button type="submit" class="btn btn-primary full-width"><i class="fas fa-sign-in-alt"></i> Se connecter</button>
+      </form>
+      <form id="registerForm" class="auth-form">
+        <div class="form-group"><label>Pseudo</label><input type="text" id="regUsername" placeholder="3+ caractères" required minlength="3"></div>
+        <div class="form-group"><label>Email</label><input type="email" id="regEmail" placeholder="email@exemple.com" required></div>
+        <div class="form-group"><label>Mot de passe</label><input type="password" id="regPassword" placeholder="6+ caractères" required minlength="6"></div>
+        <button type="submit" class="btn btn-primary full-width"><i class="fas fa-user-plus"></i> Créer un compte</button>
+        <p style="text-align:center;color:#7f8c8d;font-size:0.85rem;margin-top:0.8rem;font-style:italic">+455$ de bonus à l'inscription</p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Admin Panel -->
+  <div class="admin-panel" id="adminPanel">
+    <div class="admin-header">
+      <h2><i class="fas fa-crown"></i> Panel Administration</h2>
+      <button class="btn-close-admin" id="closeAdmin"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="admin-grid">
+      <div class="admin-card">
+        <h3><i class="fas fa-users"></i> Utilisateurs</h3>
+        <table class="admin-table"><thead><tr><th>Pseudo</th><th>Solde</th><th>Actions</th></tr></thead><tbody id="usersTableBody"></tbody></table>
+      </div>
+      <div class="admin-card">
+        <h3><i class="fas fa-coins"></i> Économie</h3>
+        <div class="form-group"><label>Joueur</label><select id="adminUserSelect"><option value="">Choisir...</option></select></div>
+        <div class="form-group"><label>Nouveau solde</label><input type="number" id="adminBalanceInput" placeholder="Montant"></div>
+        <button id="updateBalanceBtn" class="btn btn-primary" style="width:100%"><i class="fas fa-save"></i> Mettre à jour</button>
+      </div>
+      <div class="admin-card">
+        <h3><i class="fas fa-unlock"></i> Gestion Boutique Globale</h3>
+        <p style="color:#95a5a6;font-size:0.85rem;margin-bottom:0.8rem">Ces boutons affectent l'affichage pour tous les visiteurs.</p>
+        <button id="unlockAllBtn" class="btn btn-primary" style="width:100%;margin-bottom:0.5rem">🔓 Débloquer toutes les boxes</button>
+        <button id="lockAllBtn" class="btn" style="width:100%;background:var(--glass);color:var(--light);border:1px solid var(--border)">🔒 Verrouiller toutes les boxes</button>
+      </div>
+      <div class="admin-card">
+        <h3><i class="fas fa-store"></i> Configuration Boutique</h3>
+        <div class="shop-management">
+          <div class="shop-item"><span>Box Améthyste</span><span class="price-tag">1200$</span><label class="toggle"><input type="checkbox" checked disabled><span class="slider"></span></label></div>
+          <div class="shop-item"><span>Box Émeraude</span><span class="price-tag">2500$</span><label class="toggle"><input type="checkbox" id="toggleEmerald"><span class="slider"></span></label></div>
+          <div class="shop-item"><span>Box Rubis</span><span class="price-tag">3000$</span><label class="toggle"><input type="checkbox" id="toggleRuby"><span class="slider"></span></label></div>
+        </div>
+      </div>
+    </div>
+    <div class="admin-footer">
+      <span><i class="fas fa-shield-alt"></i> Session Admin Sécurisée</span>
+      <button id="adminLogout" class="btn btn-danger"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script>
+    // ⚠️ REMPLACE CETTE URL PAR TON WEBHOOK DISCORD
+    const DISCORD_WEBHOOK_URL = "METTRE_TON_WEBHOOK_DISCORD_ICI";
+
+    const App = {
+      user: null,
+      users: JSON.parse(localStorage.getItem('valdoria_users') || '[]'),
+      isAdmin: false,
+      lastReward: localStorage.getItem('valdoria_reward')
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      try {
+        createParticles();
+        setupNav();
+        setupAuth();
+        setupShop();
+        setupProfile();
+        setupAdmin();
+        setupDaily();
+        setupCopyIP();
+        updateStats();
+        updateUI();
+        updateShopUI();
+        startCountdown();
+      } catch(e) {
+        console.error('Erreur critique:', e);
+        document.body.innerHTML = '<div style="padding:3rem;text-align:center;color:#e74c3c;font-family:sans-serif"><h2>⚠️ Erreur de chargement</h2><p>Vérifiez la console (F12) ou rechargez la page.</p><button onclick="location.reload()" style="margin-top:1rem;padding:0.8rem 1.5rem;background:#9b59b6;color:white;border:none;border-radius:8px;cursor:pointer">Recharger</button></div>';
+      }
+    });
+
+    function createParticles() {
+      for(let i=0; i<18; i++) {
+        const p = document.createElement('div'); p.className = 'particle';
+        const s = Math.random()*4+2;
+        p.style.cssText = `width:${s}px;height:${s}px;background:${['#9b59b6','#f1c40f'][Math.floor(Math.random()*2)]};left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*3}s`;
+        document.body.appendChild(p);
+      }
+    }
+
+    function setupNav() {
+      document.querySelectorAll('a[href^="#"]').forEach(link => {
+        link.onclick = e => {
+          e.preventDefault();
+          const target = document.querySelector(link.getAttribute('href'));
+          if(target) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            target.classList.add('active');
+            document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+            link.classList.add('active');
+            document.getElementById('navLinks').classList.remove('active');
+          }
+        };
+      });
+      document.getElementById('mobileToggle').onclick = () => document.getElementById('navLinks').classList.toggle('active');
+      document.getElementById('adminTrigger').onclick = e => {
+        e.preventDefault();
+        if(App.isAdmin) document.getElementById('adminPanel').classList.add('active');
+        else { showToast('🔐 Accès réservé aux administrateurs', 'warning'); document.getElementById('authBtn').click(); }
+      };
+    }
+
+    function setupAuth() {
+      const modal = document.getElementById('authModal');
+      document.getElementById('authBtn').onclick = e => { e.preventDefault(); modal.classList.add('active'); };
+      document.getElementById('closeAuth').onclick = () => modal.classList.remove('active');
+      modal.onclick = e => { if(e.target === modal) modal.classList.remove('active'); };
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.onclick = () => {
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+          btn.classList.add('active');
+          document.getElementById(btn.dataset.tab + 'Form').classList.add('active');
+        };
+      });
+      document.getElementById('loginForm').onsubmit = e => {
+        e.preventDefault();
+        const u = document.getElementById('loginUsername').value.trim();
+        const p = document.getElementById('loginPassword').value;
+        if(u === 'admin' && p === '743474') {
+          App.isAdmin = true; App.user = {username:'Admin', rank:'Administrateur', balance:99999};
+          showToast('👑 Connecté en tant qu\'Administrateur', 'success'); modal.classList.remove('active'); updateUI();
+        } else {
+          const usr = App.users.find(x => x.username === u && x.password === p);
+          if(usr) { App.user = usr; showToast(`✅ Bienvenue ${usr.username}`, 'success'); modal.classList.remove('active'); updateUI(); }
+          else showToast('❌ Identifiants incorrects', 'error');
+        }
+      };
+      document.getElementById('registerForm').onsubmit = e => {
+        e.preventDefault();
+        const username = document.getElementById('regUsername').value.trim();
+        const email = document.getElementById('regEmail').value.trim();
+        const password = document.getElementById('regPassword').value;
+        if(App.users.some(x => x.username === username)) { showToast('❌ Pseudo déjà pris', 'error'); return; }
+        const newUser = { id:Date.now(), username, email, password, balance:455, rewards:0, boxes:0, rank:'Membre' };
+        App.users.push(newUser); localStorage.setItem('valdoria_users', JSON.stringify(App.users));
+        showToast('🎉 Compte créé ! +455$', 'success'); App.user = newUser; modal.classList.remove('active'); updateUI();
+      };
+      document.getElementById('logoutBtn').onclick = () => {
+        if(App.user?.username === 'Admin') App.isAdmin = false;
+        App.user = null; showToast('👋 Déconnecté', 'success'); updateUI();
+      };
+      document.getElementById('loginFromProfile').onclick = () => modal.classList.add('active');
+    }
+
+    // 🌐 ENVOI WEBHOOK DISCORD
+    function sendWebhook(boxName, username, price) {
+      if(!DISCORD_WEBHOOK_URL || DISCORD_WEBHOOK_URL === "METTRE_TON_WEBHOOK_DISCORD_ICI") return;
+      const embed = {
+        title: "💎 Achat Boutique Effectué",
+        description: `**${username}** vient d'acheter la **${boxName}**`,
+        color: 0x9b59b6,
+        fields: [
+          { name: "💰 Prix", value: `${price}$`, inline: true },
+          { name: "📅 Date", value: new Date().toLocaleString('fr-FR'), inline: true }
+        ],
+        footer: { text: "The New Valdoria | Logs Boutique" },
+        timestamp: new Date().toISOString()
+      };
+      fetch(DISCORD_WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ embeds: [embed] })
+      }).catch(err => console.warn("Webhook Discord:", err));
+    }
+
+    function setupShop() {
+      document.querySelectorAll('.btn-buy:not(:disabled)').forEach(btn => {
+        btn.onclick = () => {
+          if(!App.user || App.user.username === 'Admin') { showToast('🔐 Connectez-vous pour acheter', 'warning'); return; }
+          const price = parseInt(btn.dataset.price);
+          const boxName = btn.dataset.box;
+          if(App.user.balance >= price) {
+            App.user.balance -= price; App.user.boxes = (App.user.boxes||0) + 1; saveUser();
+            sendWebhook(boxName, App.user.username, price);
+            showToast(`🎁 ${boxName} achetée avec succès !`, 'success'); updateUI();
+          } else showToast('❌ Solde insuffisant', 'error');
+        };
+      });
+    }
+
+    function setupProfile() {
+      document.getElementById('refreshBalance').onclick = () => { if(App.user) { showToast('🔄 Actualisé', 'success'); updateUI(); } };
+    }
+
+    function setupAdmin() {
+      document.getElementById('closeAdmin').onclick = () => document.getElementById('adminPanel').classList.remove('active');
+      document.getElementById('adminLogout').onclick = () => { App.isAdmin = false; App.user = null; document.getElementById('adminPanel').classList.remove('active'); showToast('🔒 Déconnexion admin', 'success'); updateUI(); };
+      
+      document.getElementById('updateBalanceBtn').onclick = () => {
+        const id = document.getElementById('adminUserSelect').value;
+        const bal = parseInt(document.getElementById('adminBalanceInput').value);
+        if(id && !isNaN(bal)) {
+          const u = App.users.find(x => x.id == id);
+          if(u) { u.balance = bal; saveUser(); showToast('✅ Solde mis à jour', 'success'); renderAdminUsers(); }
+        }
+      };
+      
+      // 🌐 Boutons globaux pour débloquer/verrouiller
+      document.getElementById('unlockAllBtn').onclick = () => {
+        localStorage.setItem('valdoria_global_unlock', 'true');
+        updateShopUI(); showToast('🔓 Toutes les boxes sont débloquées', 'success');
+      };
+      document.getElementById('lockAllBtn').onclick = () => {
+        localStorage.setItem('valdoria_global_unlock', 'false');
+        updateShopUI(); showToast('🔒 Toutes les boxes sont verrouillées', 'success');
+      };
+      document.getElementById('toggleEmerald').onchange = e => showToast(e.target.checked ? '🔓 Émeraude activée (démo)' : '🔒 Verrouillée', 'warning');
+      document.getElementById('toggleRuby').onchange = e => showToast(e.target.checked ? '🔓 Rubis activé (démo)' : '🔒 Verrouillé', 'warning');
+    }
+
+    function updateShopUI() {
+      const globalUnlock = localStorage.getItem('valdoria_global_unlock') === 'true';
+      document.querySelectorAll('.box-card.locked-by-default').forEach(card => {
+        const overlay = card.querySelector('.lock-overlay');
+        const btn = card.querySelector('.btn-buy');
+        if(globalUnlock) {
+          card.classList.remove('locked'); card.classList.add('available');
+          overlay.style.display = 'none'; btn.disabled = false; btn.textContent = 'Acheter';
+        } else {
+          card.classList.add('locked'); card.classList.remove('available');
+          overlay.style.display = 'flex'; btn.disabled = true; btn.textContent = 'Verrouillée';
+        }
+      });
+    }
+
+    function setupDaily() {
+      document.getElementById('claimReward').onclick = () => {
+        if(!App.user) { showToast('🔐 Connectez-vous', 'warning'); return; }
+        const btn = document.getElementById('claimReward');
+        if(btn.disabled) { showToast('⏳ Revenez plus tard', 'warning'); return; }
+        const rewards = [{t:'money',v:Math.floor(Math.random()*150)+50}, {t:'box',v:'Box Améthyste 💜'}];
+        const r = rewards[Math.floor(Math.random()*rewards.length)];
+        if(r.t === 'money') { App.user.balance += r.v; showToast(`💰 +${r.v}$ ajoutés`, 'success'); }
+        else { App.user.boxes = (App.user.boxes||0)+1; showToast(`🎁 ${r.v}`, 'success'); }
+        App.lastReward = new Date().toISOString(); localStorage.setItem('valdoria_reward', App.lastReward);
+        saveUser(); btn.disabled = true; startCountdown(); updateUI();
+      };
+    }
+
+    function startCountdown() {
+      const el = document.getElementById('countdown'); const btn = document.getElementById('claimReward');
+      function update() {
+        if(!App.lastReward) { el.textContent = 'Disponible !'; btn.disabled = false; return; }
+        const diff = 24*60*60*1000 - (Date.now() - new Date(App.lastReward).getTime());
+        if(diff <= 0) { el.textContent = 'Disponible !'; btn.disabled = false; }
+        else {
+          const h = Math.floor(diff/3600000), m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
+          el.textContent = `${h}h ${m}m ${s}s`; btn.disabled = true;
+        }
+      }
+      update(); setInterval(update, 1000);
+    }
+
+    function setupCopyIP() {
+      document.getElementById('copyIP').onclick = async () => {
+        const ip = document.getElementById('serverIP').textContent;
+        try { await navigator.clipboard.writeText(ip); showToast('📋 IP copiée !', 'success'); }
+        catch { showToast(`📋 IP : ${ip}`, 'warning'); }
+      };
+      document.getElementById('launchBtn').onclick = () => showToast('🎮 Lancement... (simulation)', 'success');
+    }
+
+    function updateUI() {
+      const btn = document.getElementById('authBtn');
+      const logged = document.getElementById('loggedInProfile');
+      const notLogged = document.getElementById('loggedOutProfile');
+      if(App.user) {
+        btn.innerHTML = `<i class="fas fa-user"></i> ${App.user.username}`;
+        btn.onclick = e => { e.preventDefault(); navigateTo('profile'); };
+        logged.style.display = 'block'; notLogged.style.display = 'none';
+        document.getElementById('username').textContent = App.user.username;
+        document.getElementById('userRank').textContent = App.user.rank || 'Membre';
+        document.getElementById('userBalance').textContent = App.user.balance + '$';
+        document.getElementById('userRewards').textContent = App.user.rewards || 0;
+        document.getElementById('userBoxes').textContent = App.user.boxes || 0;
+        if(App.user.username === 'Admin') renderAdminUsers();
+      } else {
+        btn.innerHTML = `<i class="fas fa-sign-in-alt"></i> Connexion`;
+        btn.onclick = e => { e.preventDefault(); document.getElementById('authModal').classList.add('active'); };
+        logged.style.display = 'none'; notLogged.style.display = 'block';
+      }
+    }
+
+    function renderAdminUsers() {
+      const tbody = document.getElementById('usersTableBody'); const select = document.getElementById('adminUserSelect');
+      if(!tbody) return; tbody.innerHTML = ''; select.innerHTML = '<option value="">Choisir...</option>';
+      App.users.forEach(u => {
+        if(u.username === 'Admin') return;
+        tbody.innerHTML += `<tr><td>${u.username}</td><td>${u.balance}$</td><td><button onclick="editBal(${u.id})">✏️</button></td></tr>`;
+        select.innerHTML += `<option value="${u.id}">${u.username} (${u.balance}$)</option>`;
+      });
+    }
+
+    window.editBal = function(id) {
+      const u = App.users.find(x => x.id === id);
+      if(u) {
+        const val = prompt(`Nouveau solde pour ${u.username}:`, u.balance);
+        if(val && !isNaN(parseInt(val))) { u.balance = parseInt(val); saveUser(); showToast('✅ Mis à jour', 'success'); renderAdminUsers(); updateUI(); }
+      }
+    };
+
+    function saveUser() {
+      const i = App.users.findIndex(x => x.id === App.user?.id);
+      if(i !== -1) App.users[i] = App.user;
+      localStorage.setItem('valdoria_users', JSON.stringify(App.users));
+    }
+
+    function updateStats() {
+      const total = App.users.reduce((s,u) => s + (u.balance||0), 0);
+      document.getElementById('totalMoney').textContent = total.toLocaleString() + '$';
+      setInterval(() => {
+        document.getElementById('playerCount').textContent = 52 + Math.floor(Math.random()*5) - 2;
+        document.getElementById('casesOpened').textContent = 21 + Math.floor(Math.random()*3);
+      }, 30000);
+    }
+
+    function navigateTo(id) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+      document.querySelector(`a[href="#${id}"]`)?.classList.add('active');
+    }
+
+    function showToast(msg, type='info') {
+      const c = document.getElementById('toastContainer'); const t = document.createElement('div');
+      t.className = `toast ${type}`;
+      t.innerHTML = `<i class="fas fa-${type==='success'?'check-circle':type==='error'?'exclamation-circle':'info-circle'}"></i> ${msg}`;
+      c.appendChild(t); setTimeout(() => t.remove(), 3000);
+    }
+  </script>
+</body>
+</html>
